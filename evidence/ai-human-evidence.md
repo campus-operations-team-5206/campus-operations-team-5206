@@ -1,72 +1,180 @@
-# Incident Diagnosis (Olay Teşhisi): YerimVar Vakası Analizi
+# AI-Human Evidence (Yapay Zekâ ve İnsan Kanıtı)
 
-YerimVar vakasındaki kırılmalar kod hatalarından ziyade mühendislik süreçlerindeki eksikliklerden kaynaklanmıştır. Sunulan vaka zaman çizelgesi (YerimVar Incident Timeline) incelenerek 3 kritik kopma noktası (breakpoint) belirlenmiş, süreç boşlukları ve eksik mühendislik kanıtları tanımlanmıştır.
+## Amaç (Purpose)
 
-## Breakpoint 1: İki Farklı Gerçeklik ve Durum (State) Yönetiminin Çökmesi (Two Realities)
+Bu dokümanın amacı, Esenyurt Üniversitesi kampüsündeki asansör yoğunluğu problemi için yapay zekâ tarafından üretilen çözüm önerilerini incelemek ve bu önerilerin takım tarafından değerlendirilmesini göstermektir.
 
-### What happened? (Ne oldu?)
-
-Deniz ve Ege'nin ekranlarında aynı sınıf (Sınıf 204) için farklı durumlar gösterilmiştir. Deniz'in ekranında sınıf "DOLU", Ege'nin ekranında ise "BOŞ" olarak görünmüştür.
-
-Bu durum, sistemdeki senkronizasyon ve durum (state) yönetiminin düzgün çalışmadığını göstermektedir.
-
-### Process Gap (Süreç Boşluğu)
-
-- **Eşzamanlılık (Concurrency) ve Senkronizasyon Yönetimi Eksikliği:** Birden fazla kullanıcının aynı kaynağa erişimini ve durum güncellemelerini eşzamanlı olarak yöneten merkezi bir durum yönetimi mimarisi tasarlanmamıştır.
-- **Gerçek Zamanlı Veri Doğrulama Süreç Boşluğu:** İstemciler (client) arasındaki durum senkronizasyonunu kontrol eden ve doğrulayan entegrasyon testleri yapılmamıştır.
-
-### Missing Evidence (Eksik Kanıt)
-
-- Sınıf rezervasyon durumlarının eşzamanlı güncellendiğini doğrulayan entegrasyon test raporları (Concurrency Test Logs).
-- Durum yönetimi ve senkronizasyon mimarisini açıklayan teknik tasarım dokümanı (State Management Architecture Document).
+Yapay zekâ tarafından oluşturulan öneriler doğrudan doğru kabul edilmemiştir. Her öneri takım tarafından incelenmiş, **ACCEPT (Kabul), REJECT (Ret), MODIFY (Değiştir) veya UNCERTAIN (Belirsiz)** olarak değerlendirilmiştir.
 
 ---
 
-## Breakpoint 2: Ortam (Environment) Bağımlılığı ve "Benim Bilgisayarımda Çalışıyordu" Yanılgısı (Environment Failure & Localhost)
+## Problem Özeti (Problem Summary)
 
-### What happened? (Ne oldu?)
+Esenyurt Üniversitesi kampüsünün dikey mimarisi nedeniyle özellikle sabah saatlerinde ve ders başlangıç/bitiş zamanlarında asansörlerin önünde yoğunluk oluşmaktadır.
 
-Uygulama çalıştırılmak istendiğinde `ModuleNotFoundError: No module named 'flask'` hatası alınmıştır.
+Takım gözlemlerine göre asansör bekleme süresi yaklaşık **7–8 dakika** olabilmekte ve yoğunluğun arttığı zamanlarda bu süre daha da uzayabilmektedir. Özellikle **0. ve 2. katlarda** yoğunluk daha belirgin gözlemlenmiştir.
 
-Bu durum, ürünün yalnızca Deniz'in bilgisayarında çalıştığını ve proje bağımlılıklarının ve çalışma ortamının yeterince yönetilmediğini göstermiştir.
-
-Ayrıca canlı sunucu yerine `localhost:8000` adresi üzerinden dağıtım yapılmaya çalışılmıştır.
-
-### Process Gap (Süreç Boşluğu)
-
-- **Bağımlılık ve Ortam Yönetimi (Dependency Management) Eksikliği:** Proje bağımlılıklarını izole eden ve standartlaştıran yapılandırma dosyaları (`requirements.txt`, `Dockerfile` vb.) ve ortam yönetimi disiplini uygulanmamıştır.
-- **Sürekli Entegrasyon ve Dağıtım (CI/CD) Süreç Boşluğu:** Kodun farklı bilgisayarlarda veya canlı sunucuda tutarlı şekilde çalışmasını sağlayacak otomatik build, test ve deployment süreçleri kurulmamıştır.
-
-### Missing Evidence (Eksik Kanıt)
-
-- Sürüm bağımlılıklarını sabitleyen konfigürasyon dosyaları (`requirements.txt` / `Dockerfile`).
-- Otomatik derleme, test ve yayınlama sürecini doğrulayan CI/CD pipeline çalışma ve test logları.
+Ancak asansör sayısının kesin olarak yetersiz olduğu henüz kanıtlanmamıştır. Sorunun asansör kapasitesi, öğrenci yoğunluğu, ders saatlerinin aynı zamana denk gelmesi veya bu faktörlerin birlikte etkisinden kaynaklanıp kaynaklanmadığı araştırılmalıdır.
 
 ---
 
-## Breakpoint 3: Yapay Zeka Kodunun Sahiplenilememesi ve Açıklanamaması (Unexplained AI Code)
+## AI Proposal 1: Asansör Kullanım Verilerinin Ölçülmesi (Measuring Elevator Usage Data)
 
-### What happened? (Ne oldu?)
+### AI Önerisi (AI Proposal)
 
-Kod içerisindeki kritik algoritmaya (`optimize_reservation`) "// YZ yazdı. Çalışır gibi. Dokunmayın." şeklinde bir yorum eklenmiştir.
+Yapay zekâ, öncelikle asansörlerin hangi saatlerde ne kadar kullanıldığının ölçülmesini önermiştir.
 
-Bu durum, kodun neden bu şekilde tasarlandığının ekip tarafından yeterince anlaşılmadığını ve kodun mühendislik açısından sahiplenilmediğini göstermektedir.
+Ölçülebilecek veriler:
 
-### Process Gap (Süreç Boşluğu)
+- Asansör bekleme süresi
+- Asansör başına düşen öğrenci sayısı
+- Saatlik kullanım yoğunluğu
+- En yoğun katlar
+- Ders başlangıç ve bitiş saatleri
+- Asansörlerin doluluk oranı
 
-- **Kod İnceleme (Code Review) ve Sahiplik Süreç Eksikliği:** Üretilen kodun takımdaki mühendisler tarafından anlaşıldığını, doğrulandığını ve sahiplenildiğini garanti eden peer-review süreçleri işletilmemiştir.
-- **Mimari Karar Kaydı (ADR) Eksikliği:** Algoritmanın neden bu şekilde tasarlandığını ve kararların gerekçesini açıklayan dokümantasyon (Context, Alternatives, Decision, Rationale) tutulmamıştır.
+### Takım Kararı (Team Decision)
 
-### Missing Evidence (Eksik Kanıt)
+**ACCEPT — KABUL**
 
-- Kodun insan tarafından incelendiğini ve onaylandığını gösteren Pull Request (PR) Code Review kayıtları.
-- Algoritma tasarım kararlarını ve gerekçelerini açıklayan Mimari Karar Kaydı (Architecture Decision Record - ADR) dokümanı.
+### Gerekçe (Reason)
+
+Bu öneri problemin temel bilinmeyenlerinden birini araştırmaktadır. Şu anda 7–8 dakikalık bekleme süresine ilişkin gözlemimiz bulunmasına rağmen günün tamamını kapsayan sistematik bir veri bulunmamaktadır.
+
+Ölçüm yapılması, yoğunluğun hangi saatlerde ve hangi katlarda oluştuğunu daha doğru şekilde anlamamızı sağlayacaktır.
+
+### Gerekli Kanıt (Required Evidence)
+
+- Farklı saatlerde yapılan bekleme süresi ölçümleri
+- Kat bazında öğrenci yoğunluğu
+- Asansör kullanım sayıları
+- Ders başlangıç/bitiş saatleri ile yoğunluk karşılaştırması
+
+---
+
+## AI Proposal 2: Ders Başlangıç Saatlerinin Dağıtılması (Staggering Class Start Times)
+
+### AI Önerisi (AI Proposal)
+
+Yapay zekâ, derslerin aynı saatlerde başlamasının asansör yoğunluğunu artırabileceğini ve ders başlangıç saatlerinin farklılaştırılmasının yoğunluğu azaltabileceğini önermiştir.
+
+Örneğin derslerin tamamının aynı saatte başlaması yerine farklı zaman aralıklarına dağıtılması önerilmektedir.
+
+### Takım Kararı (Team Decision)
+
+**UNCERTAIN — BELİRSİZ**
+
+### Gerekçe (Reason)
+
+Bu önerinin teorik olarak yoğunluğu azaltabileceği düşünülmektedir. Ancak ders programlarının değiştirilmesinin uygulanabilir olup olmadığı ve asansör yoğunluğunu ne kadar azaltacağı henüz bilinmemektedir.
+
+Ayrıca sorunun yalnızca ders başlangıç saatlerinden kaynaklandığına dair yeterli kanıt bulunmamaktadır.
+
+Bu nedenle öneri şu aşamada doğrudan kabul edilmemiş ve önce veri toplanmasına karar verilmiştir.
+
+### Gerekli Kanıt (Required Evidence)
+
+- Ders başlangıç saatleri ile asansör yoğunluğu arasındaki ilişki
+- Aynı anda farklı katlara hareket eden öğrenci sayısı
+- Ders saatlerinin değiştirilmesinin uygulanabilirliği
+- Ders saatleri değiştirildiğinde yoğunluğun nasıl değişeceğine ilişkin ölçüm veya simülasyon
+
+---
+
+## AI Proposal 3: Asansör Kullanımının Katlara Göre Düzenlenmesi (Organizing Elevator Usage by Floors)
+
+### AI Önerisi (AI Proposal)
+
+Yapay zekâ, yoğun saatlerde asansör kullanımının belirli katlara göre düzenlenmesini önermiştir.
+
+Örneğin bazı asansörlerin belirli katlara öncelikli hizmet vermesi veya yoğun kullanılan katlara yönelik farklı bir kullanım düzeni oluşturulması düşünülebilir.
+
+### Takım Kararı (Team Decision)
+
+**MODIFY — DEĞİŞTİR**
+
+### Gerekçe (Reason)
+
+Öneri problem açısından mantıklı görünmektedir ancak mevcut asansör sisteminin teknik olarak böyle bir yönlendirmeyi destekleyip desteklemediği bilinmemektedir.
+
+Ayrıca hangi katların gerçekten daha yoğun olduğu konusunda şu anda yalnızca gözlemsel bilgi bulunmaktadır.
+
+Bu nedenle önerinin doğrudan uygulanması yerine önce yoğunluk verilerinin toplanmasına karar verilmiştir.
+
+Öneri şu şekilde değiştirilmiştir:
+
+> Öncelikle yoğun kullanılan katlar ve saatler ölçülecek, daha sonra asansörlerin kullanımının katlara göre düzenlenmesinin uygulanabilirliği değerlendirilecektir.
+
+### Gerekli Kanıt (Required Evidence)
+
+- Kat bazında kullanım yoğunluğu
+- Asansörlerin mevcut teknik özellikleri
+- Asansörlerin bağımsız olarak yönlendirilebilir olup olmadığı
+- Yapılacak düzenlemenin bekleme süresine etkisi
+
+---
+
+## AI Proposal 4: Yeni Asansör Eklenmesi (Adding a New Elevator)
+
+### AI Önerisi (AI Proposal)
+
+Yapay zekâ, mevcut asansör kapasitesinin yetersiz olması durumunda kampüse yeni bir asansör eklenmesini önermiştir.
+
+### Takım Kararı (Team Decision)
+
+**REJECT — REDDET**
+
+### Gerekçe (Reason)
+
+Bu öneri ilk bakışta doğrudan bir çözüm gibi görünse de mevcut kampüs yapısında yeni bir asansör eklemek için uygun fiziksel alan bulunup bulunmadığı bilinmemektedir.
+
+Ayrıca asansör sayısının gerçekten problemin temel nedeni olduğu da henüz kanıtlanmamıştır.
+
+Bu nedenle mevcut kanıtlar yeterli olmadığı için yeni asansör eklenmesi önerisi şu aşamada reddedilmiştir.
+
+### Gerekli Kanıt (Required Evidence)
+
+Önerinin tekrar değerlendirilebilmesi için:
+
+- Mevcut asansörlerin kapasite kullanım oranı
+- Yoğun saatlerde oluşan talep
+- Yeni asansör için fiziksel alan bulunup bulunmadığı
+- İnşaat ve maliyet uygulanabilirliği
+- Yeni asansörün bekleme süresini ne kadar azaltacağı
+
+gibi kanıtların elde edilmesi gerekir.
+
+---
+
+## İnsan Kararı ve Sonraki Adım (Human Decision and Next Step)
+
+Yapay zekâ tarafından üretilen öneriler doğrudan uygulanmamıştır. Takım tarafından yapılan değerlendirme sonucunda:
+
+| AI Önerisi | Takım Kararı | Karar Nedeni |
+|---|---|---|
+| Asansör kullanım verilerinin ölçülmesi | **ACCEPT** | Problemin gerçek boyutunu anlamak için gerekli |
+| Ders başlangıç saatlerinin dağıtılması | **UNCERTAIN** | Uygulanabilirliği ve etkisi henüz kanıtlanmadı |
+| Katlara göre asansör kullanımının düzenlenmesi | **MODIFY** | Önce yoğunluk verileri ve teknik uygunluk araştırılmalı |
+| Yeni asansör eklenmesi | **REJECT** | Kök neden ve fiziksel uygulanabilirlik kanıtlanmadı |
+
+Bu değerlendirmeye göre takımın ilk önceliği herhangi bir çözümü doğrudan uygulamak değil, **asansör yoğunluğuna ilişkin güvenilir veri toplamaktır**.
+
+Özellikle aşağıdaki soruların cevaplanması hedeflenmektedir:
+
+1. Ortalama asansör bekleme süresi gerçekten kaç dakikadır?
+2. En yoğun saatler hangileridir?
+3. En yoğun katlar hangileridir?
+4. Yoğunluğun temel nedeni asansör kapasitesi midir?
+5. Ders başlangıç saatleri yoğunluğu ne kadar etkilemektedir?
+6. Öğrencilerin ne kadarı asansör yoğunluğu nedeniyle derse geç kalmaktadır?
+
+Bu veriler elde edildikten sonra çözüm seçenekleri yeniden değerlendirilmelidir.
 
 ---
 
 ## AI Usage Record (AI Kullanım Kaydı)
 
-- **AI Tool(s) (AI Aracı):** ChatGPT / Gemini
-- **AI Role (AI Rolü):** Drafting / Structuring / Reviewing (Taslak oluşturma / Yapılandırma / İnceleme)
-- **Human Review (İnsan İncelemesi):** Completed (Tamamlandı)
-- **Final Decision (Son Karar):** Team (Takım)
+**AI Tool(s):** ChatGPT / Gemini  
+**AI Role:** Drafting / Structuring / Reviewing  
+**Human Review:** Completed  
+**Final Decision:** Team
