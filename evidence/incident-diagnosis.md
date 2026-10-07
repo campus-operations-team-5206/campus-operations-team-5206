@@ -1,103 +1,122 @@
-# Incident Diagnosis (Olay Teşhisi): YerimVar Vakası Analizi
+# Incident Diagnosis (Olay Teşhisi): Kampüs Asansör Yoğunluğu
 
-YerimVar vakasındaki kırılmalar yalnızca kod hatalarından değil, aynı zamanda mühendislik süreçlerindeki eksikliklerden kaynaklanmıştır. Sunulan vaka zaman çizelgesi incelenerek 3 kritik kopma noktası (breakpoint) belirlenmiş, bu noktalar için süreç boşlukları ve eksik mühendislik kanıtları tanımlanmıştır.
+Esenyurt Üniversitesi kampüsündeki asansör yoğunluğu problemi incelendiğinde, sorun yalnızca asansörlerin yoğun olması şeklinde değerlendirilmemelidir. Mevcut gözlemler, problemin anlaşılması ve çözüm geliştirilmesi sürecinde bazı mühendislik süreç boşluklarının bulunduğunu göstermektedir.
 
----
-
-## Breakpoint 1: İki Farklı Gerçeklik ve Durum Yönetiminin Çökmesi (Two Realities)
-
-### What happened? (Ne oldu?)
-
-Deniz ve Ege'nin ekranlarında aynı sınıf (**Sınıf 204**) için farklı durumlar gösterilmiştir. Deniz'in ekranında sınıf **“DOLU”**, Ege'nin ekranında ise **“BOŞ”** olarak görünmüştür.
-
-Bu durum, kullanıcıların aynı kaynak hakkında farklı bilgiler görmesine ve rezervasyon sistemindeki durum bilgisinin güvenilirliğinin kaybolmasına neden olmuştur.
-
-### Process Gap (Süreç Boşluğu)
-
-- **Eşzamanlılık (Concurrency) ve Senkronizasyon Yönetimi Eksikliği:** Birden fazla kullanıcının aynı kaynağa erişmesini ve durum güncellemelerini eşzamanlı olarak yöneten merkezi bir durum yönetimi yaklaşımı yeterince tasarlanmamıştır.
-- **Gerçek Zamanlı Veri Doğrulama Süreç Boşluğu:** İstemciler arasındaki durum senkronizasyonunu kontrol eden ve doğrulayan yeterli entegrasyon testleri yapılmamıştır.
-
-### Missing Evidence (Eksik Kanıt)
-
-- Sınıf rezervasyon durumlarının eşzamanlı güncellendiğini doğrulayan **Concurrency Test Logs**
-- Durum yönetimi ve senkronizasyon mimarisini açıklayan **State Management Architecture Document**
+Bu analizde, kampüs asansör problemi üzerinden 3 kritik kopma noktası (breakpoint) belirlenmiş; her nokta için ne olduğu, süreç boşluğu ve eksik kanıtlar tanımlanmıştır.
 
 ---
 
-## Breakpoint 2: Ortam Bağımlılığı ve “Benim Bilgisayarımda Çalışıyordu” Yanılgısı (Environment Failure & Localhost)
+## Breakpoint 1: Asansör Bekleme Süresinin Sistematik Olarak Ölçülmemesi (Missing Measurement)
 
 ### What happened? (Ne oldu?)
 
-Uygulama çalıştırılmak istendiğinde:
+Takım gözlemlerine göre öğrenciler özellikle sabah saatlerinde ve ders başlangıç/bitiş zamanlarında asansörleri kullanmak için yoğun kuyruklar oluşturmaktadır.
 
-`ModuleNotFoundError: No module named 'flask'`
+Gözlemlerimizde ortalama bekleme süresinin yaklaşık **7–8 dakika** olduğu görülmüştür. Yoğunluğun arttığı zamanlarda bekleme süresinin daha da uzayabildiği ve özellikle **0. ve 2. katlarda** yoğunluğun daha belirgin olduğu gözlemlenmiştir.
 
-hatası alınmıştır.
-
-Bu durum, uygulamanın yalnızca Deniz'in bilgisayarında çalıştığını ve gerekli bağımlılıkların proje içerisinde yeterince tanımlanmadığını göstermiştir.
-
-Ayrıca uygulamanın canlı bir sunucu yerine **`localhost:8000`** adresi üzerinden çalıştırılmaya/dağıtılmaya çalışıldığı görülmüştür.
+Ancak bu değerler henüz günün farklı saatlerini ve farklı günleri kapsayan sistematik bir ölçüm sonucuna dayanmamaktadır.
 
 ### Process Gap (Süreç Boşluğu)
 
-- **Dependency Management Eksikliği:** `requirements.txt`, `Dockerfile` veya benzeri bağımlılık ve ortam yönetimi mekanizmaları kullanılmamıştır.
-- **CI/CD Süreç Boşluğu:** Uygulamanın farklı bilgisayarlarda ve canlı sunucuda tutarlı şekilde çalışmasını sağlayacak otomatik build, test ve deployment süreçleri oluşturulmamıştır.
+- Bekleme sürelerinin belirli bir yöntem kullanılarak düzenli şekilde ölçülmemesi
+- Sabah, ders başlangıcı ve ders bitişi gibi farklı zamanların ayrı ayrı karşılaştırılmaması
+- Kat bazında yoğunluğun sistematik olarak kaydedilmemesi
+- Gözlemlerin ölçülebilir bir veri setine dönüştürülmemesi
 
 ### Missing Evidence (Eksik Kanıt)
 
-- `requirements.txt`
-- `Dockerfile`
-- CI/CD pipeline çalışma ve test logları
-- Ortam kurulumunun nasıl yapılacağını açıklayan dokümantasyon
+- Farklı gün ve saatlerde bekleme süresi ölçümleri
+- Yoğun saatlerde ortalama ve maksimum bekleme süreleri
+- Kat bazında bekleyen öğrenci sayıları
+- Asansör başına düşen öğrenci sayısı
+- Yoğunluğun gün içerisindeki değişimini gösteren veri
 
 ---
 
-## Breakpoint 3: Yapay Zekâ Kodunun Sahiplenilememesi ve Açıklanamaması (Unexplained AI Code)
+## Breakpoint 2: Problemin Kök Nedeninin Varsayım Olarak Kalması (Unverified Root Cause)
 
 ### What happened? (Ne oldu?)
 
-Kritik algoritma olan `optimize_reservation` fonksiyonuna:
+Takımın mevcut gözlemlerinde asansör yoğunluğunun temel nedeninin **öğrenci sayısının fazla ve asansör sayısının yetersiz olması** olabileceği düşünülmektedir.
 
-`// YZ yazdı. Çalışır gibi. Dokunmayın.`
+Ancak bu durum henüz kanıtlanmış değildir.
 
-şeklinde bir yorum eklenmiştir.
+Yoğunluğun;
 
-Bu yaklaşım sonucunda kodun neden bu şekilde tasarlandığı, hangi varsayımlara dayandığı ve doğru çalışıp çalışmadığı ekip tarafından yeterince anlaşılamamıştır.
+- aynı anda derslerin başlaması,
+- öğrencilerin aynı saatlerde kat değiştirmesi,
+- belirli katlarda öğrenci yoğunluğunun fazla olması,
+- asansör kapasitesinin yetersiz olması
 
-Böylece yapay zekâ tarafından üretilen kodun sorumluluğu ve sahipliği ekip içerisinde kaybolmuştur.
+veya bu faktörlerin birlikte etkisinden kaynaklanıp kaynaklanmadığı bilinmemektedir.
 
 ### Process Gap (Süreç Boşluğu)
 
-- **Code Review ve Ownership Eksikliği:** Yapay zekâ tarafından üretilen kodun ekip tarafından anlaşıldığını, doğrulandığını ve sahiplenildiğini garanti eden bir peer review süreci uygulanmamıştır.
-- **ADR Eksikliği:** Kodun hangi problem için üretildiğini, hangi alternatiflerin değerlendirildiğini ve neden mevcut çözümün seçildiğini açıklayan bir **ADR (Architecture Decision Record)** bulunmamaktadır.
+- Gözlem ile kanıtlanmış sonuç arasındaki ayrımın yeterince yapılmaması
+- Kök neden analizi yapılmadan “asansör sayısı yetersiz” varsayımına yönelme riski
+- Öğrenci hareketleri ile ders saatleri arasındaki ilişkinin ölçülmemesi
+- Asansör kapasitesi ile gerçek kullanım talebinin karşılaştırılmaması
 
 ### Missing Evidence (Eksik Kanıt)
 
-- Pull Request (PR) code review kayıtları
-- `optimize_reservation` algoritmasına ilişkin test sonuçları
-- ADR dokümanı
-- AI tarafından üretilen kodun insan tarafından incelendiğini gösteren kayıtlar
+- Mevcut asansörlerin kişi/kapasite bilgileri
+- Yoğun saatlerdeki gerçek kullanıcı sayısı
+- Ders başlangıç ve bitiş saatleri ile asansör yoğunluğu arasındaki ilişki
+- Hangi katlardan hangi katlara daha fazla hareket edildiği
+- Asansörlerin yoğun saatlerdeki kullanım oranı
+
+---
+
+## Breakpoint 3: Kanıtlanmadan Çözüm Seçimine Geçilmesi (Premature Solution Selection)
+
+### What happened? (Ne oldu?)
+
+Asansör yoğunluğu görüldüğünde doğrudan çözüm olarak daha fazla asansör eklenmesi, kullanım düzeninin değiştirilmesi veya ders saatlerinin farklılaştırılması gibi fikirler ortaya çıkabilir.
+
+Ancak mevcut durumda problemin temel nedeni kesin olarak belirlenmediği için bu çözümlerden herhangi birinin en doğru çözüm olduğu söylenemez.
+
+Özellikle kampüs yapısında yeni bir asansör için fiziksel alan bulunup bulunmadığı da henüz doğrulanmamıştır.
+
+### Process Gap (Süreç Boşluğu)
+
+- Kök neden doğrulanmadan çözüm seçilmesi
+- Çözüm seçeneklerinin ölçülebilir kriterlerle karşılaştırılmaması
+- Fiziksel ve teknik uygulanabilirliğin araştırılmaması
+- Bir çözümün bekleme süresini ne kadar azaltacağının önceden değerlendirilmemesi
+
+### Missing Evidence (Eksik Kanıt)
+
+- Yeni asansör eklenmesi için fiziksel alan ve teknik uygunluk bilgisi
+- Alternatif çözümlerin bekleme süresine etkisi
+- Çözüm seçeneklerinin maliyet ve uygulanabilirlik karşılaştırması
+- Yoğunluk ölçümleri üzerinden yapılacak simülasyon veya tahmin sonuçları
+- Öğrencilerin çözüm seçenekleri hakkındaki görüşleri
 
 ---
 
 ## Genel Sonuç (Overall Conclusion)
 
-YerimVar vakasında ortaya çıkan sorunlar yalnızca tek tek kod hataları olarak değerlendirilmemelidir. Olayın temelinde;
+Kampüs asansör probleminde temel sorun yalnızca asansörlerin yoğun olması değildir. Problemin anlaşılması sırasında **ölçüm eksikliği, kök nedenin kanıtlanmamış olması ve yeterli kanıt toplanmadan çözüm seçme riski** bulunmaktadır.
 
-- durum ve senkronizasyon yönetiminin yeterince doğrulanmaması,
-- bağımlılık ve çalışma ortamının standartlaştırılmaması,
-- CI/CD süreçlerinin bulunmaması,
-- yapay zekâ tarafından üretilen kodun ekip tarafından yeterince incelenmemesi ve sahiplenilmemesi
+Bu nedenle takımın ilk aşamadaki önceliği doğrudan bir çözüm uygulamak değil, mevcut problemi ölçülebilir hale getirmektir.
 
-gibi mühendislik süreç boşlukları bulunmaktadır.
+Öncelikle;
 
-Bu nedenle benzer problemlerin önlenmesi için yalnızca kodun düzeltilmesi değil, **test, dokümantasyon, code review, dependency management ve AI-generated code ownership** süreçlerinin de geliştirilmesi gerekmektedir.
+1. Bekleme süreleri ölçülmeli,
+2. Yoğun saatler belirlenmeli,
+3. Yoğun katlar tespit edilmeli,
+4. Asansör kapasitesi ve kullanım oranı karşılaştırılmalı,
+5. Ders saatleri ile yoğunluk arasındaki ilişki incelenmeli,
+
+ve bu verilerden sonra kök neden belirlenmelidir.
+
+Böylece geliştirilecek çözüm, yalnızca bir varsayıma değil **ölçülmüş ve doğrulanmış kanıtlara** dayanacaktır.
 
 ---
 
 ## AI Usage Record (AI Kullanım Kaydı)
 
-**AI Tool(s):** ChatGPT / Gemini  
+**AI Tool(s):** ChatGPT  
 **AI Role:** Drafting / Structuring / Reviewing  
 **Human Review:** Completed  
 **Final Decision:** Team
