@@ -7,9 +7,6 @@
 - **Takım üyeleri:**
   - Abdurrahman Furkan Şıkoğlu
   - Halil Erdem Gül
-- **GitHub deposu:** [GitHub depo bağlantınızı buraya ekleyin]
-- **Tarih:** 18 Ekim 2026
-- **Sürüm:** 1.0
 
 ## 2. Proje Genel Bakışı
 
