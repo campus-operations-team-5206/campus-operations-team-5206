@@ -209,7 +209,7 @@ Nihai takım onayı, her iki üyenin bu yaklaşımı birlikte değerlendirip kab
 
 | Takım üyesi | Karar durumu |
 |---|---|
-| Abdurrahman Furkan Şıkoğlu | Takım onayı bekleniyor |
-| Halil Erdem Gül | Takım onayı bekleniyor |
+| Abdurrahman Furkan Şıkoğlu | Onaylandı |
+| Halil Erdem Gül | Onaylandı|
 
 **Sonuç:** Takım onayının ardından bu süreç proje boyunca uygulanacak ve ihtiyaç duyulursa elde edilen geri bildirimlere göre iyileştirilecektir.
