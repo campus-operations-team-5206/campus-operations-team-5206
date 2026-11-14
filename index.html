@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus Operations — Elevator Congestion Analytics MVP (Team 5206)</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Üst Bilgi ve Veri Kaynağı Durum Çubuğu (REQ-08) -->
+  <header class="top-header">
+    <div class="container header-content">
+      <div>
+        <span class="badge-team">Team 5206 • Yazılım Geliştirme Süreçleri</span>
+        <h1>Esenyurt Üniversitesi — Asansör Yoğunluk Analizi (MVP v0.1)</h1>
+        <p class="subtitle">13 Katlı Kampüs Binası (2 Tek Kat + 2 Çift Kat Asansörü) • Observation → Data → Analysis → Verification</p>
+      </div>
+      <div class="source-status-box" id="sourceStatusBox" aria-live="polite">
+        <!-- JS tarafından dinamik doldurulacak -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Akademik Mühendislik Uyarısı -->
+  <div class="principle-banner">
+    <div class="container">
+      <strong>Mühendislik İlkesi:</strong> <span>Demo Verisi ≠ Doğrulanmış Saha Kanıtı</span> | 
+      <span>0. ve 2. kat yoğunluk hipotezi henüz kanıtlanmamış bir ön gözlemdir; yeterli saha gözlemi (OBSERVED) toplanmadan kesin sonuç çıkarılamaz.</span>
+    </div>
+  </div>
+
+  <main class="container main-grid">
+    <!-- BÖLÜM A: Gözlem Giriş Formu (REQ-01) -->
+    <section class="card form-section">
+      <h2>1. Yeni Gözlem Kaydı Ekle (Observation Entry)</h2>
+      <form id="observationForm" novalidate>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="obsDate">Gözlem Tarihi *</label>
+            <input type="date" id="obsDate" required />
+          </div>
+
+          <div class="form-group">
+            <label for="obsTime">Gözlem Saati *</label>
+            <input type="time" id="obsTime" required />
+          </div>
+
+          <div class="form-group">
+            <label for="obsFloor">Kat Numarası (0 - 13) *</label>
+            <input type="number" id="obsFloor" min="0" max="13" step="1" placeholder="Örn: 0 veya 2" required />
+            <small class="hint">0: Zemin (Çift) • Tek katlar: 1-13 • Çift katlar: 0-12</small>
+          </div>
+
+          <div class="form-group">
+            <label for="obsWaitTime">Bekleme Süresi (Saniye) *</label>
+            <input type="number" id="obsWaitTime" min="0" step="1" placeholder="Örn: 180" required />
+          </div>
+
+          <div class="form-group">
+            <label for="obsPeopleCount">Bekleyen Kişi Sayısı *</label>
+            <input type="number" id="obsPeopleCount" min="0" step="1" placeholder="Örn: 12" required />
+          </div>
+
+          <div class="form-group">
+            <label for="obsSourceType">Veri Kaynağı Tipi *</label>
+            <select id="obsSourceType" required>
+              <option value="OBSERVED">OBSERVED (Gerçek Saha Ölçümü)</option>
+              <option value="DEMO">DEMO (Örnek / Simülasyon Verisi)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="obsNote">İsteğe Bağlı Açıklama</label>
+          <input type="text" id="obsNote" maxlength="160" placeholder="Örn: 09:00 ders başlangıcı öncesi kuyruk..." />
+        </div>
+
+        <div id="formError" class="error-box hidden" role="alert"></div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Kaydı Ekle</button>
+          <button type="button" id="loadDemoBtn" class="btn btn-secondary">Örnek DEMO Verilerini Yükle</button>
+          <button type="button" id="clearDemoBtn" class="btn btn-danger-outline">Tüm DEMO Kayıtlarını Sil</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- BÖLÜM C: Genel Bekleme Süresi İstatistikleri (REQ-04) -->
+    <section class="card stats-section">
+      <div class="section-header-inline">
+        <h2>2. Bekleme Süresi Özeti (Aktif Görünüm)</h2>
+        <span class="scope-tag" id="activeScopeLabel">Tüm Kayıtlar</span>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">Toplam Gözlem</span>
+          <strong class="kpi-value" id="kpiTotal">0</strong>
+          <small class="kpi-sub" id="kpiBreakdown">0 OBSERVED / 0 DEMO</small>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Ortalama Bekleme</span>
+          <strong class="kpi-value" id="kpiAvg">0 sn</strong>
+          <small class="kpi-sub" id="kpiAvgMin">(0.0 dk)</small>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Minimum Bekleme</span>
+          <strong class="kpi-value" id="kpiMin">0 sn</strong>
+          <small class="kpi-sub">En kısa ölçüm</small>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Maksimum Bekleme</span>
+          <strong class="kpi-value" id="kpiMax">0 sn</strong>
+          <small class="kpi-sub">En uzun ölçüm</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- BÖLÜM E: Veri Görselleştirme (REQ-06) -->
+    <section class="card charts-section">
+      <h2>3. Veri Görselleştirme (Charts)</h2>
+      <p class="section-desc" id="chartDataDisclaimer">
+        Grafikler mevcut aktif veri setine göre anlık üretilir.
+      </p>
+      <div class="charts-grid">
+        <div class="chart-box">
+          <div class="chart-header">
+            <h3>Katlara Göre Ortalama Bekleme Süresi (sn)</h3>
+            <span class="chart-meta" id="floorChartMeta">n = 0</span>
+          </div>
+          <canvas id="floorChart" width="520" height="260"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-header">
+            <h3>Saat Aralığına Göre Ortalama Bekleme Süresi (sn)</h3>
+            <span class="chart-meta" id="hourChartMeta">n = 0</span>
+          </div>
+          <canvas id="hourChart" width="520" height="260"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- BÖLÜM D: Kat Bazlı Yoğunluk ve 0. & 2. Kat Karşılaştırması (REQ-05) -->
+    <section class="card congestion-section">
+      <h2>4. Kat Bazlı Yoğunluk ve Ön Gözlem Karşılaştırması</h2>
+      <p class="section-desc">
+        Ön gözlemlerde <strong>0. ve 2. katların</strong> daha yoğun olduğu varsayılmıştır. Aşağıdaki karşılaştırma bu hipotezi mevcut verilerle test eder (<strong>n &lt; 5</strong> olan katlar güvenilir kanıt sayılmaz).
+      </p>
+
+      <div class="comparison-grid" id="floorComparisonCards">
+        <!-- JS tarafından doldurulacak: 0. Kat vs 2. Kat vs Diğer Katlar -->
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Kat</th>
+              <th>Asansör Grubu</th>
+              <th>Gözlem Sayısı (n)</th>
+              <th>Ort. Bekleme Süresi</th>
+              <th>Ort. Bekleyen Kişi</th>
+              <th>Kanıt Güvenilirlik Durumu</th>
+            </tr>
+          </thead>
+          <tbody id="floorStatsBody">
+            <!-- JS ile doldurulacak -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- BÖLÜM B: Filtreleme ve Gözlem Listesi (REQ-02, REQ-03, REQ-07) -->
+    <section class="card list-section">
+      <div class="section-header-inline">
+        <h2>5. Gözlem Kayıtları Tablosu (Observation List)</h2>
+        <span id="filteredCountBadge" class="count-badge">0 kayıt listeleniyor</span>
+      </div>
+
+      <!-- Filtre Çubuğu -->
+      <div class="filter-bar">
+        <div class="filter-item">
+          <label for="filterSource">Veri Kaynağı</label>
+          <select id="filterSource">
+            <option value="ALL">Tümü (OBSERVED + DEMO)</option>
+            <option value="OBSERVED">Sadece OBSERVED (Gerçek)</option>
+            <option value="DEMO">Sadece DEMO (Örnek)</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label for="filterDate">Tarih</label>
+          <input type="date" id="filterDate" />
+        </div>
+
+        <div class="filter-item">
+          <label for="filterFloor">Kat</label>
+          <select id="filterFloor">
+            <option value="ALL">Tüm Katlar (0–13)</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label for="filterTimeFrom">Saat Başlangıç</label>
+          <input type="time" id="filterTimeFrom" />
+        </div>
+
+        <div class="filter-item">
+          <label for="filterTimeTo">Saat Bitiş</label>
+          <input type="time" id="filterTimeTo" />
+        </div>
+
+        <div class="filter-item filter-actions">
+          <button type="button" id="resetFiltersBtn" class="btn btn-secondary">Filtreleri Temizle</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tarih</th>
+              <th>Saat</th>
+              <th>Kat (Asansör)</th>
+              <th>Bekleme Süresi</th>
+              <th>Kişi Sayısı</th>
+              <th>Kaynak</th>
+              <th>Açıklama</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="observationsTableBody">
+            <!-- JS ile doldurulacak -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Campus Operations — Team 5206 (Halil Erdem Gül, Abdurrahman Furkan Şıkoğlu) • Esenyurt Üniversitesi • Iterative Development &amp; Kanban MVP</p>
+    </div>
+  </footer>
+
+  <script src="js/storage.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
