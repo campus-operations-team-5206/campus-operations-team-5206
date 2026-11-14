@@ -8,7 +8,7 @@
 Campus Operations Semester Project
 
 ## Selected Problem Area
-13 katlı kampüsümüzde 4 asansör bulunuyor: 2 tanesi tek katlara, 2 tanesi çift katlara hizmet veriyor. Asansörlerde oluşan uzun sıralar yüzünden öğrenciler ve akademisyenler derslerine geç kalıyor.
+15 katlı kampüsümüzde 4 asansör bulunuyor: 2 tanesi tek katlara, 2 tanesi çift katlara hizmet veriyor. Asansörlerde oluşan uzun sıralar yüzünden öğrenciler ve akademisyenler derslerine geç kalıyor.
 
 ## AI Usage Record
 AI Tool(s): Claude
