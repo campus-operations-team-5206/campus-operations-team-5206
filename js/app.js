@@ -63,7 +63,7 @@ obsDate.value = localDate;
 
     const waitRaw = obsWaitTime.value.trim();
     const waitTime = Number(waitRaw);
-    if (waitRaw === "" || Number.isNaN(waitTime) || waitTime < 0) {
+    if (waitRaw === "" || !Number.isInteger(waitTime) || waitTime < 0) {
       return "Geçersiz bekleme süresi: Bekleme süresi 0 veya pozitif bir sayı olmalıdır.";
     }
 
