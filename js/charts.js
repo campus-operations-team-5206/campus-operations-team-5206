@@ -63,10 +63,12 @@ const ChartRenderer = (() => {
       ctx.fillRect(x, y, barWidth, barH);
 
       // Çubuk üstü değer ve örneklem sayısı (n)
-      ctx.fillStyle = "#0f172a";
-      ctx.font = "bold 11px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(`${item.value}s (n=${item.count})`, x + barWidth / 2, y - 6);
+    // Çubuk üstü değer ve örneklem sayısı (n)
+ctx.fillStyle = "#0f172a";
+ctx.font = "bold 11px sans-serif";
+ctx.textAlign = "center";
+const topLabel = items.length > 8 ? `${item.value}s` : `${item.value}s (n=${item.count})`;
+ctx.fillText(topLabel, x + barWidth / 2, y - 6);
 
       // X ekseni etiketi
       ctx.fillStyle = "#334155";
