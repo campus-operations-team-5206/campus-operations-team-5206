@@ -36,7 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Varsayılan tarih/saati bugüne ayarla
   const now = new Date();
-  obsDate.value = now.toISOString().split("T")[0];
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+obsDate.value = localDate;
   obsTime.value = now.toTimeString().slice(0, 5);
 
   function showFormError(msg) {
