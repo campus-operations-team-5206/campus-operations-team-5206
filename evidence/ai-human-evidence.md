@@ -172,9 +172,37 @@ Bu veriler elde edildikten sonra çözüm seçenekleri yeniden değerlendirilmel
 
 ---
 
-## AI Usage Record (AI Kullanım Kaydı)
+---
 
-**AI Tool(s):** ChatGPT / Gemini  
-**AI Role:** Drafting / Structuring / Reviewing  
-**Human Review:** Completed  
-**Final Decision:** Team
+## Iteration 1 (MVP) — Yazılım Mimarisi ve Uygulama Kararları (AI vs. Human Evidence)
+
+MVP geliştirme sürecinde yapay zekâ araçlarından (ChatGPT, Gemini) mimari, veri görselleştirme ve arayüz bileşenleri için öneriler alınmış; ancak her teknik öneri takım tarafından değerlendirilerek filtrelenmiştir.
+
+### AI Proposal 5: Harici Grafik Kütüphanesi Kullanımı (Chart.js / ApexCharts)
+- **AI Önerisi:** Kat ve saat bazlı grafikler için CDN üzerinden harici bir grafik kütüphanesi (Chart.js) entegre edilmesi.
+- **Takım Kararı:** **REJECT — REDDET**
+- **Gerekçe:** Harici kütüphaneler gereksiz bağımlılık yaratmakta, internet bağlantısı olmayan yerel test ortamlarında (offline local test) kırılma riski taşımakta ve kod okunabilirliğini azaltmaktadır. Bunun yerine takım kararıyla sıfır bağımlılıklı saf HTML5 Canvas (`js/charts.js`) modülü yazılmıştır.
+
+### AI Proposal 6: Uygulama Açılışında Gerçekçi Örnek Veri Gösterimi
+- **AI Önerisi:** Uygulama ilk açıldığında boş görünmemesi için örnek bekleme süresi verilerinin otomatik yüklenmesi.
+- **Takım Kararı:** **MODIFY — DEĞİŞTİR**
+- **Gerekçe:** Boş ekran yerine örnek veri gösterimi kullanıcı deneyimi açısından kabul edilmiş, ancak simülasyon verilerinin gerçek saha ölçümü sanılması riskine karşı `sourceType: "DEMO" | "OBSERVED"` veri modeli ayrımı, üst uyarı şeridi (*"Demo Verisi ≠ Doğrulanmış Saha Kanıtı"*) ve tek tıkla *"Tüm DEMO Kayıtlarını Sil"* özelliği zorunlu kılınmıştır.
+
+### AI Proposal 7: Kat Yoğunluğu Karşılaştırmasında Doğrudan Ortalama Sıralaması
+- **AI Önerisi:** Tüm katların ortalama bekleme süresine göre sıralanıp en yoğun katın doğrudan ilan edilmesi.
+- **Takım Kararı:** **MODIFY — DEĞİŞTİR**
+- **Gerekçe:** Tek bir ölçüme (ör. `n = 1`) dayanarak bir katı "en yoğun kat" ilan etmek istatistiksel olarak yanıltıcıdır. Takım kararıyla minimum örneklem eşiği (`MIN_RELIABLE_SAMPLE = 5`) tanımlanmış ve 5'in altındaki kayıtlar arayüzde *"Sınırlı Güvenilirlik"* uyarısıyla işaretlenmiştir.
+
+### AI Proposal 8: Backend Veritabanı ve Kullanıcı Giriş Sistemi Kurulumu
+- **AI Önerisi:** Gözlemleri saklamak için Node.js/PHP backend ve MySQL veritabanı kurulması.
+- **Takım Kararı:** **REJECT (Iteration 1 Kapsam Dışı)**
+- **Gerekçe:** Iteration 1 hedefi hızlı prototipleme ve yerel tarayıcıda çalışan bir MVP doğrulamasıdır. Sunucu kurulumu yerine istemci taraflı `LocalStorage` (`js/storage.js`) tercih edilerek `index.html` dosyasının tek tıkla her bilgisayarda çalıştırılabilmesi sağlanmıştır.
+
+---
+
+## Güncel AI Kullanım Özeti (Iteration 1 Dahil)
+
+- **AI Tool(s):** ChatGPT, Gemini
+- **AI Role:** Taslak oluşturma, modüler JS yapılandırma, test senaryosu önerisi, dokümantasyon inceleme
+- **Human Review:** Halil Erdem Gül & Abdurrahman Furkan Şıkoğlu tarafından tamamlandı
+- **Final Decision:** Team 5206
