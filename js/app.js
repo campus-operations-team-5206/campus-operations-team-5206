@@ -187,7 +187,7 @@ obsDate.value = localDate;
     const cards = [
       { title: "0. Kat (Zemin — Çift Asansör)", data: floor0, highlight: true },
       { title: "2. Kat (Çift Asansör)", data: floor2, highlight: true },
-      { title: "Diğer Tüm Katlar (1, 3–13)", data: others, highlight: false }
+      { title: "Diğer Tüm Katlar (1, 3–15)", data: others, highlight: false }
     ];
 
     compContainer.innerHTML = cards
