@@ -49,12 +49,12 @@
 ### TC-04: Geçersiz Kat Numarasının Reddedilmesi
 - **Test ID:** TC-04
 - **Requirement ID:** REQ-01
-- **Preconditions:** `index.html` tarayıcıda açık (Kampüs binası 0–13 katlıdır).
+- **Preconditions:** `index.html` tarayıcıda açık (Kampüs binası 0–15 katlıdır).
 - **Test Steps:**
-  1. Kat numarası alanına `15` (veya `-1`) girin.
+  1. Kat numarası alanına `16` (veya `-1`) girin.
   2. Diğer alanları geçerli değerlerle doldurup "Kaydı Ekle" butonuna tıklayın.
-- **Expected Result:** Sistem bina sınırları dışındaki kat numarasını reddeder ve `0` ile `13` arasında tam sayı girilmesi gerektiğini belirten uyarı verir.
-- **Actual Result:** Sistem `15` değerini reddetti ve `"Geçersiz kat numarası: Kampüs binası için 0 ile 13 arasında tam sayı girmelisiniz."` hata mesajını gösterdi.
+- **Expected Result:** Sistem bina sınırları dışındaki kat numarasını reddeder ve `0` ile `15` arasında tam sayı girilmesi gerektiğini belirten uyarı verir.
+- **Actual Result:** Sistem `16` değerini reddetti ve `"Geçersiz kat numarası: Kampüs binası için 0 ile 13 arasında tam sayı girmelisiniz."` hata mesajını gösterdi.
 - **Status:** PASS
 
 ### TC-05: Kat Bazlı Filtreleme
