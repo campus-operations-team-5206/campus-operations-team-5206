@@ -58,7 +58,7 @@ obsDate.value = localDate;
     const floorRaw = obsFloor.value.trim();
     const floor = Number(floorRaw);
     if (floorRaw === "" || !Number.isInteger(floor) || floor < 0 || floor > 15) {
-      return "Geçersiz kat numarası: Kampüs binası için 0 ile 13 arasında tam sayı girmelisiniz.";
+      return "Geçersiz kat numarası: Kampüs binası için 0 ile 15 arasında tam sayı girmelisiniz.";
     }
 
     const waitRaw = obsWaitTime.value.trim();
