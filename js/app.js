@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetFiltersBtn = document.getElementById("resetFiltersBtn");
 
   // Kat filtresi seçeneklerini doldur (0 - 13)
-  for (let f = 0; f <= 13; f++) {
+  for (let f = 0; f <= 15; f++) {
     const opt = document.createElement("option");
     opt.value = String(f);
     opt.textContent = `${f}. Kat (${f % 2 === 0 ? "Çift" : "Tek"})`;
@@ -57,7 +57,7 @@ obsDate.value = localDate;
 
     const floorRaw = obsFloor.value.trim();
     const floor = Number(floorRaw);
-    if (floorRaw === "" || !Number.isInteger(floor) || floor < 0 || floor > 13) {
+    if (floorRaw === "" || !Number.isInteger(floor) || floor < 0 || floor > 15) {
       return "Geçersiz kat numarası: Kampüs binası için 0 ile 13 arasında tam sayı girmelisiniz.";
     }
 
